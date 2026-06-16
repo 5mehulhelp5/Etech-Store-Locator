@@ -13,6 +13,8 @@ class Locator extends Template
 {
     private const XML_PATH_API_KEY        = 'etechflow_storelocator/general/google_maps_api_key';
     private const XML_PATH_DEFAULT_RADIUS = 'etechflow_storelocator/general/default_radius';
+    private const XML_PATH_BRAND_NAME     = 'etechflow_storelocator/general/brand_name';
+    private const XML_PATH_STORE_NAME     = 'general/store_information/name';
 
     public function __construct(
         Context $context,
@@ -41,5 +43,18 @@ class Locator extends Template
     public function getSearchUrl(): string
     {
         return $this->getUrl('store-finder/stores/search');
+    }
+
+    /**
+     * Brand/store name shown in the storefront copy ("Visit your local <brand> store").
+     * Falls back to the configured Store Name, then an empty string (generic copy).
+     */
+    public function getBrandName(): string
+    {
+        $brand = (string) $this->scopeConfig->getValue(self::XML_PATH_BRAND_NAME, ScopeInterface::SCOPE_STORE);
+        if ($brand === '') {
+            $brand = (string) $this->scopeConfig->getValue(self::XML_PATH_STORE_NAME, ScopeInterface::SCOPE_STORE);
+        }
+        return trim($brand);
     }
 }

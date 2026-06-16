@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 $apiKey    = $escaper->escapeHtmlAttr($block->getGoogleMapsApiKey());
 $searchUrl = $escaper->escapeUrl($block->getSearchUrl());
+$brand     = $block->getBrandName();
 
 $_om       = \Magento\Framework\App\ObjectManager::getInstance();
 $_storeMgr = $_om->get(\Magento\Store\Model\StoreManagerInterface::class);
@@ -194,7 +195,7 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
                 <?= $escaper->escapeHtml(__('Store Locator')) ?>
             </h1>
             <p class="ks-sf-sub">
-                <?= $escaper->escapeHtml(__('Find your nearest Etechflow store and get directions instantly.')) ?>
+                <?= $escaper->escapeHtml($brand !== '' ? __('Find your nearest %1 store and get directions instantly.', $brand) : __('Find your nearest store and get directions instantly.')) ?>
             </p>
 
             <div class="ks-sf-badges">
@@ -456,7 +457,7 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
                     </svg>
                 </span>
                 <div style="min-width:0;">
-                    <p style="font-size:13.5px;font-weight:800;color:#0E1025;margin:0 0 3px;line-height:1.3;">Visit your local Etechflow store</p>
+                    <p style="font-size:13.5px;font-weight:800;color:#0E1025;margin:0 0 3px;line-height:1.3;"><?= $escaper->escapeHtml($brand !== '' ? __('Visit your local %1 store', $brand) : __('Visit your local store')) ?></p>
                     <p style="font-size:11.5px;color:#6B7280;margin:0 0 10px;line-height:1.5;">Expert advice, quality products, and professional services you can trust.</p>
                     <a href="#ks-store-locator" style="display:inline-flex;align-items:center;gap:6px;background:#C41818;color:#fff;font-size:11px;font-weight:800;padding:9px 14px;border-radius:6px;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;box-shadow:0 4px 10px rgba(196,24,24,0.25);">
                         Find Your Nearest Store
