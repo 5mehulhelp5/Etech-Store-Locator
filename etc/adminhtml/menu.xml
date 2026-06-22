@@ -8,6 +8,13 @@
              sortOrder="100"
              parent="Magento_Backend::stores"
              resource="Etechflow_StoreLocator::stores"/>
+        <add id="Etechflow_StoreLocator::license"
+             title="License"
+             module="Etechflow_StoreLocator"
+             sortOrder="5"
+             parent="Etechflow_StoreLocator::store_locator_root"
+             action="etechflow_storelocator/license/gate"
+             resource="Etechflow_StoreLocator::stores"/>
         <add id="Etechflow_StoreLocator::manage_stores"
              title="Manage Stores"
              module="Etechflow_StoreLocator"

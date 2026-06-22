@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Admin license gate: on every Store Locator admin action, redirect to the
+ * License gate page when the module is unlicensed. The AdminGate observer
+ * exempts the License controllers so re-licensing stays possible.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="controller_action_predispatch_etechflow_storelocator">
+        <observer name="etechflow_storelocator_admin_gate" instance="Etechflow\StoreLocator\Observer\AdminGate"/>
+    </event>
+</config>

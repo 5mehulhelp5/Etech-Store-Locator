@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Storefront license gate: on every Store Locator frontend action (the
+ * store-finder page and the stores/search AJAX), 404 the request when the
+ * module is unlicensed.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="controller_action_predispatch_storelocator">
+        <observer name="etechflow_storelocator_frontend_gate" instance="Etechflow\StoreLocator\Observer\FrontendGate"/>
+    </event>
+</config>
