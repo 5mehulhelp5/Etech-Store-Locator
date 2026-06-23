@@ -18,11 +18,13 @@
         <policy id="script-src">
             <values>
                 <value id="unpkg_s" type="host">unpkg.com</value>
+                <value id="tailwind_s" type="host">cdn.tailwindcss.com</value>
             </values>
         </policy>
         <policy id="style-src">
             <values>
                 <value id="unpkg_st" type="host">unpkg.com</value>
+                <value id="tailwind_st" type="host">cdn.tailwindcss.com</value>
             </values>
         </policy>
     </policies>

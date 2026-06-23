@@ -181,6 +181,43 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
 }
 </style>
 
+<?php /* Theme-agnostic boot. Hyvä already ships Tailwind + Alpine; on Luma (or any
+       non-Tailwind theme) load them on THIS page only, so the store finder is styled
+       and interactive on either theme. Preflight is disabled so Tailwind's global CSS
+       reset never touches the surrounding Luma header/footer. */ ?>
+<script>
+(function () {
+    // Probe: does the active theme already provide Tailwind? (Hyvä does — '.flex' resolves.)
+    var probe = document.createElement('div');
+    probe.className = 'flex';
+    document.body.appendChild(probe);
+    var hasTailwind = window.getComputedStyle(probe).display === 'flex';
+    document.body.removeChild(probe);
+    if (hasTailwind) { return; }   // Hyvä — nothing to do.
+
+    // Luma fallback — register the brand colours the markup uses, disable preflight,
+    // then pull in Tailwind (JIT) and Alpine for this page.
+    window.tailwind = {
+        config: {
+            corePlugins: { preflight: false },
+            theme: { extend: { colors: { brand: {
+                dark: '#0E1025', blue: '#0535F5', red: '#C41818'
+            } } } }
+        }
+    };
+    var tw = document.createElement('script');
+    tw.src = 'https://cdn.tailwindcss.com';
+    document.head.appendChild(tw);
+
+    if (typeof window.Alpine === 'undefined') {
+        var al = document.createElement('script');
+        al.src = 'https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js';
+        al.defer = true;
+        document.head.appendChild(al);
+    }
+})();
+</script>
+
 <div x-data="storeLocator()" x-init="init()" class="ks-locator font-sans text-brand-dark">
 
     <!-- ── HERO ── -->
