@@ -273,6 +273,55 @@ class LicenseValidator
         return (bool) $features[$flag];
     }
 
+    /**
+     * Current licence state for the configured key, read live (cached 60s) from
+     * the portal's /license/status endpoint. Read-only: NEVER clears the key.
+     * Returns one of: active | suspended | blocked | expired | invalid | none.
+     * Used by the admin banner to explain WHY the module is frozen without
+     * removing the key (suspension/expiry/IP-block all keep the key in config).
+     */
+    public function getLicenseState(): string
+    {
+        $host = $this->getCurrentHost();
+        $key  = $this->getConfiguredKey();
+        if ($host === '' || $key === '') {
+            return 'none';
+        }
+        $cacheKey = self::CACHE_PREFIX . 'state_' . md5($host . ':' . $key);
+        $cached   = $this->cache->load($cacheKey);
+        if ($cached !== false) {
+            return (string) $cached;
+        }
+
+        $base  = rtrim(str_replace('/license/validate', '', $this->getPortalUrl()), '/');
+        $url   = $base . '/license/status?platform=magento&module=' . self::MODULE_ID
+            . '&domain=' . urlencode($host) . '&license_key=' . urlencode($key);
+        $state = 'invalid';
+
+        try {
+            $this->curl->setTimeout(8);
+            $this->curl->addHeader('Accept', 'application/json');
+            $this->curl->get($url);
+            if ((int) $this->curl->getStatus() === 200) {
+                $d = json_decode((string) $this->curl->getBody(), true);
+                if (is_array($d)) {
+                    if (!empty($d['ip_blocked'])) {
+                        $state = 'blocked';
+                    } elseif (!empty($d['state'])) {
+                        $state = (string) $d['state'];
+                    } elseif (isset($d['valid'])) {
+                        $state = $d['valid'] ? 'active' : 'invalid';
+                    }
+                }
+            }
+        } catch (\Throwable) {
+            // Portal unreachable — leave 'invalid' (do not cache long).
+        }
+
+        $this->cache->save($state, $cacheKey, [self::CACHE_TAG], 60);
+        return $state;
+    }
+
     private function isDevelopmentHost(string $host): bool
     {
         if ($host === 'localhost' || str_starts_with($host, '127.')) {
