@@ -273,17 +273,6 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
 /* Map — height comes from min-h-[420px] (Tailwind) which is absent on Luma → give a real floor */
 .ks-locator .sf-map{min-height:420px!important;}
 @media(min-width:1024px){.ks-locator .sf-map{height:100%!important;}}
-
-/* ── Anti-FOUC ───────────────────────────────────────────
-   On refresh the raw Alpine markup paints before Alpine boots and (on Luma)
-   before the Tailwind CDN compiles, flashing the unstyled "old" UI. Keep the
-   finder hidden until it is genuinely ready — _reveal() adds .ks-ready once
-   Alpine has booted AND the first store load finished — and show a pure-CSS
-   spinner (no JS / no Tailwind needed) in its place meanwhile. */
-.ks-locator:not(.ks-ready){display:none!important;}
-#ks-sf-boot{min-height:480px;display:flex;align-items:center;justify-content:center;background:#f9fafb;}
-#ks-sf-boot .ks-sf-spin{display:inline-block;width:42px;height:42px;border:4px solid #e5e7eb;border-top-color:#0535F5;border-radius:50%;animation:ks-sf-spin .7s linear infinite;}
-@keyframes ks-sf-spin{to{transform:rotate(360deg);}}
 </style>
 
 <?php /* Theme-agnostic boot. Hyvä already ships Tailwind + Alpine; on Luma (or any
@@ -322,15 +311,6 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
     }
 })();
 </script>
-
-<?php /* Boot loader: a pure-CSS spinner shown in the finder's place until Alpine
-       has booted AND the first store load has finished (see _reveal()), so the
-       unstyled markup never flashes on refresh. The timeout below is a safety net
-       so a hung network can never leave the page spinning forever. */ ?>
-<div id="ks-sf-boot" role="status" aria-live="polite" aria-busy="true" aria-label="<?= $escaper->escapeHtmlAttr(__('Loading store finder')) ?>">
-    <span class="ks-sf-spin"></span>
-</div>
-<script>setTimeout(function(){var r=document.querySelector('.ks-locator');if(r){r.classList.add('ks-ready');}var b=document.getElementById('ks-sf-boot');if(b){b.remove();}},8000);</script>
 
 <div x-data="storeLocator()" x-init="init()" class="ks-locator font-sans text-brand-dark">
 
@@ -711,18 +691,8 @@ function storeLocator() {
                 this.error = 'Could not load store data. Please try again later.';
             }
             this.loading = false;
-            this._reveal();
             await this.ensureLeaflet();
-            this.$nextTick(() => requestAnimationFrame(() => this.initMap()));
-        },
-
-        _reveal() {
-            // First paint is ready: latch .ks-ready (one-way) to un-hide the finder
-            // and drop the boot spinner. Subsequent searches reuse the in-component
-            // loading spinner, so this never re-hides the UI.
-            if (this.$root) { this.$root.classList.add('ks-ready'); }
-            var _b = document.getElementById('ks-sf-boot');
-            if (_b) { _b.remove(); }
+            this.$nextTick(() => this.initMap());
         },
 
         ensureLeaflet() {
@@ -741,15 +711,7 @@ function storeLocator() {
                 attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
             }).addTo(this.map);
             this.renderMarkers();
-            // Anti-FOUC reveals the finder from display:none and it lives in a flex column,
-            // so on a fast (full-page-cached) load Leaflet can measure a 0-size container
-            // (the classic grey box). Re-assert size after layout settles: next paint, a few
-            // delays, and whenever the container actually changes size (e.g. on reveal).
-            const _fixMap = () => { if (this.map) { this.map.invalidateSize(); this.renderMarkers(); } };
-            requestAnimationFrame(() => requestAnimationFrame(_fixMap));
-            [120, 400, 900, 1800].forEach(ms => setTimeout(_fixMap, ms));
-            const _mapEl = document.getElementById('ks-store-map');
-            if (window.ResizeObserver && _mapEl) { new ResizeObserver(_fixMap).observe(_mapEl); }
+            setTimeout(() => { if (this.map) { this.map.invalidateSize(); this.renderMarkers(); } }, 350);
         },
 
         renderMarkers() {
