@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Auto-injects a "Store Locator" link into the storefront footer on every page,
+ * so customers can reach /store-finder without the merchant wiring a link by hand.
+ * Both links are licence-aware (hidden when unlicensed, matching the FrontendGate
+ * 404) and each is scoped to its theme so the link is never duplicated:
+ *
+ *   - Luma : added to the core `footer_links` block (StoreLink). Hyvä does not
+ *            render that block, so this is naturally Luma-only.
+ *   - Hyvä : added to the standard `footer` container (HyvaFooterLink), which
+ *            renders its own Tailwind markup and self-gates to Hyvä themes only.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="footer_links">
+            <block class="Etechflow\StoreLocator\Block\Frontend\StoreLink"
+                   name="etechflow-storelocator-footer-link">
+                <arguments>
+                    <argument name="label" xsi:type="string" translate="true">Store Locator</argument>
+                    <argument name="path" xsi:type="string">store-finder</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+        <referenceContainer name="footer">
+            <block class="Etechflow\StoreLocator\Block\Frontend\HyvaFooterLink"
+                   name="etechflow-storelocator-hyva-footer-link"
+                   template="Etechflow_StoreLocator::footer-link.phtml"/>
+        </referenceContainer>
+    </body>
+</page>
