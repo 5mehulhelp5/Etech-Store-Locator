@@ -271,7 +271,7 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
 .ks-locator .sf-tab:not(.bg-brand-blue):hover{border-color:#0535F5;color:#0535F5;}
 
 /* Map — height comes from min-h-[420px] (Tailwind) which is absent on Luma → give a real floor */
-.ks-locator .sf-map{min-height:420px!important;}
+.ks-locator .sf-map{min-height:420px!important;width:100%!important;}
 @media(min-width:1024px){.ks-locator .sf-map{height:100%!important;}}
 </style>
 
@@ -704,14 +704,24 @@ function storeLocator() {
         },
 
         initMap() {
-            if (typeof L === 'undefined' || this.map || !document.getElementById('ks-store-map')) return;
+            if (typeof L === 'undefined' || this.map) return;
+            const _el = document.getElementById('ks-store-map');
+            if (!_el) return;
+            // Do NOT init Leaflet until the container actually has a size, else it draws a
+            // grey box with no tiles. Retry (up to ~6s) until layout gives it dimensions.
+            if (!_el.offsetWidth || !_el.offsetHeight) {
+                if ((this._mapTries = (this._mapTries || 0) + 1) < 60) { setTimeout(() => this.initMap(), 100); }
+                return;
+            }
             const center = this.allStores.length ? [this.allStores[0].lat, this.allStores[0].lng] : [52.6, -1.5];
             this.map = L.map('ks-store-map', { scrollWheelZoom: false }).setView(center, this.allStores.length === 1 ? 13 : 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
             }).addTo(this.map);
             this.renderMarkers();
-            setTimeout(() => { if (this.map) { this.map.invalidateSize(); this.renderMarkers(); } }, 350);
+            const _fix = () => { if (this.map) { this.map.invalidateSize(); this.renderMarkers(); } };
+            [100, 300, 600, 1200].forEach(ms => setTimeout(_fix, ms));
+            window.addEventListener('resize', _fix);
         },
 
         renderMarkers() {
