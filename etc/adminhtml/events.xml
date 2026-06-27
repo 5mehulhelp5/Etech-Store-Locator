@@ -11,4 +11,12 @@
     <event name="controller_action_predispatch_etechflow_storelocator">
         <observer name="etechflow_storelocator_admin_gate" instance="Etechflow\StoreLocator\Observer\AdminGate"/>
     </event>
+    <event name="controller_action_predispatch_etechflow_storelocator_license_gate">
+        <observer name="etechflow_rs_update_notification_gate"
+                  instance="Etechflow\StoreLocator\Observer\AddUpdateNotification"/>
+    </event>
+    <event name="controller_action_predispatch_adminhtml_system_config_edit">
+        <observer name="etechflow_rs_update_notification_sysconfig"
+                  instance="Etechflow\StoreLocator\Observer\AddUpdateNotification"/>
+    </event>
 </config>
