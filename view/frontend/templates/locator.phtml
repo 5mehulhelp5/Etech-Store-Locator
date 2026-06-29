@@ -43,7 +43,7 @@ $_baseUrl  = $_storeMgr->getStore()->getBaseUrl();
     line-height:1.25rem!important;color:#0E1025!important;width:100%!important;margin:0
 }
 .ks-locator input[type=text]::placeholder{color:#9ca3af!important;opacity:1}
-.ks-locator input[type=text]:focus{border-color:#0535F5!important;box-shadow:0 0 0 1px #0535F5!important;outline:none}
+.ks-locator input[type=text]:focus{border-color:var(--sf-accent,#0535F5)!important;box-shadow:0 0 0 1px var(--sf-accent,#0535F5)!important;outline:none}
 .ks-locator select{
     -webkit-appearance:none;appearance:none;box-shadow:none!important;height:auto!important;
     background-color:#fff!important;border:1px solid #e5e7eb!important;border-radius:.5rem!important;
@@ -55,8 +55,8 @@ $_baseUrl  = $_storeMgr->getStore()->getBaseUrl();
     -webkit-appearance:none!important;appearance:none!important;height:4px!important;border-radius:2px;
     background:#e5e7eb!important;cursor:pointer;padding:0!important;box-shadow:none!important;border:0!important
 }
-.ks-locator input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#0535F5;cursor:pointer;border:0;margin-top:-6px}
-.ks-locator input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#0535F5;cursor:pointer;border:0}
+.ks-locator input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--sf-accent,#0535F5);cursor:pointer;border:0;margin-top:-6px}
+.ks-locator input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--sf-accent,#0535F5);cursor:pointer;border:0}
 /* Remove theme padding-bottom that creates empty white space below the page */
 body.storelocator-index-index .page-wrapper .columns,
 body.storelocator-index-index .page-main,
@@ -229,13 +229,13 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
    Tailwind utility classes are kept in the markup so a correctly-configured
    Hyvä theme renders identically.
    ════════════════════════════════════════════════════════ */
-.ks-locator .bg-brand-blue{background-color:#0535F5!important;}
-.ks-locator .bg-brand-red{background-color:#C41818!important;}
+.ks-locator .bg-brand-blue{background-color:var(--sf-accent,#0535F5)!important;}
+.ks-locator .bg-brand-red{background-color:var(--sf-accent,#C41818)!important;}
 .ks-locator .text-white{color:#fff!important;}
 .ks-locator .text-brand-dark{color:#0E1025!important;}
-.ks-locator .text-brand-blue{color:#0535F5!important;}
-.ks-locator .border-brand-blue{border-color:#0535F5!important;}
-.ks-locator .accent-brand-blue{accent-color:#0535F5!important;}
+.ks-locator .text-brand-blue{color:var(--sf-accent,#0535F5)!important;}
+.ks-locator .border-brand-blue{border-color:var(--sf-accent,#0535F5)!important;}
+.ks-locator .accent-brand-blue{accent-color:var(--sf-accent,#0535F5)!important;}
 
 /* Button + tab base — full structure so they render even when NO Tailwind loads (Luma) */
 .ks-locator .sf-btn,
@@ -253,22 +253,22 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
 
 /* Primary (red) — Search, Get Directions */
 .ks-locator .sf-btn--red{
-    background-color:#C41818!important;color:#fff!important;
+    background-color:var(--sf-accent,#C41818)!important;color:var(--sf-accent-contrast,#fff)!important;
     padding:.625rem 1.25rem;box-shadow:0 1px 2px rgba(196,24,24,.25);
 }
-.ks-locator .sf-btn--red:hover{background-color:#A31414!important;}
+.ks-locator .sf-btn--red:hover{filter:brightness(.92);}
 .ks-locator .sf-btn--red:disabled{opacity:.6;cursor:default;}
 
 /* Ghost (white / outline) — Reset, Street View, View Store */
 .ks-locator .sf-btn--ghost{
     background-color:#fff!important;border-color:#e5e7eb!important;color:#4b5563!important;
 }
-.ks-locator .sf-btn--ghost:hover{border-color:#0535F5!important;color:#0535F5!important;}
+.ks-locator .sf-btn--ghost:hover{border-color:var(--sf-accent,#0535F5)!important;color:var(--sf-accent,#0535F5)!important;}
 
 /* Mode tabs — inactive default; the active state rides the bg-brand-blue class Alpine toggles */
 .ks-locator .sf-tab{padding:.5rem 1rem;background-color:#fff;border-color:#e5e7eb;color:#4b5563;}
-.ks-locator .sf-tab.bg-brand-blue{color:#fff!important;border-color:#0535F5!important;box-shadow:0 1px 2px rgba(5,53,245,.2);}
-.ks-locator .sf-tab:not(.bg-brand-blue):hover{border-color:#0535F5;color:#0535F5;}
+.ks-locator .sf-tab.bg-brand-blue{color:var(--sf-accent-contrast,#fff)!important;border-color:var(--sf-accent,#0535F5)!important;box-shadow:0 1px 2px rgba(5,53,245,.2);}
+.ks-locator .sf-tab:not(.bg-brand-blue):hover{border-color:var(--sf-accent,#0535F5);color:var(--sf-accent,#0535F5);}
 
 /* Map — height comes from min-h-[420px] (Tailwind) which is absent on Luma → give a real floor */
 .ks-locator .sf-map{min-height:420px!important;width:100%!important;}
@@ -680,6 +680,9 @@ function storeLocator() {
         get pagedStores() { const start = (this.currentPage - 1) * this.perPage; return this.filteredStores.slice(start, start + this.perPage); },
 
         async init() {
+            // Start the map immediately, in PARALLEL with the store fetch — the base
+            // tiles paint right away instead of waiting for the data round-trip.
+            this.ensureLeaflet().then(() => this.$nextTick(() => this.initMap()));
             try {
                 const _u = '<?= $searchUrl ?>';
                 const res  = await fetch(_u + (_u.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now(), { cache: 'no-store' });
@@ -691,8 +694,8 @@ function storeLocator() {
                 this.error = 'Could not load store data. Please try again later.';
             }
             this.loading = false;
-            await this.ensureLeaflet();
-            this.$nextTick(() => this.initMap());
+            // Stores are in now — ensure the map exists (no-op if already up) and drop the pins.
+            this.$nextTick(() => { this.initMap(); this.renderMarkers(); });
         },
 
         ensureLeaflet() {
@@ -848,5 +851,75 @@ function storeLocator() {
 }
 </script>
 
+<!-- Faster Leaflet + map tiles: warm up the CDN / tile connections early. -->
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin>
+<link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin>
+<link rel="preconnect" href="https://c.tile.openstreetmap.org" crossorigin>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" async></script>
+
+<script>
+/* Auto-match the active theme: read the theme's primary-button colour and feed it
+   into the locator's CSS variables (--sf-accent / --sf-accent-contrast). It reads the
+   COMPUTED colour, so it works on Luma (LESS), Hyvä (Tailwind) or any custom theme
+   without depending on a colour token. Falls back to the module's own red/blue. */
+(function () {
+    function parseRgb(c) {
+        var m = c && c.match(/rgba?\(([^)]+)\)/);
+        if (!m) return null;
+        var p = m[1].split(',').map(parseFloat);
+        return { r: p[0], g: p[1], b: p[2], a: (p[3] === undefined ? 1 : p[3]) };
+    }
+    function isReal(c) {
+        var p = parseRgb(c);
+        if (!p || isNaN(p.r) || p.a < 0.4) return false;     // transparent / unset
+        if (p.r > 235 && p.g > 235 && p.b > 235) return false; // ~white — not an accent
+        return true;
+    }
+    // Pull the first solid colour out of a CSS gradient (Luma primary buttons use one).
+    function gradColor(img) {
+        if (!img || img.indexOf('gradient') < 0) return null;
+        var m = img.match(/rgba?\([^)]+\)|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}/);
+        return m ? m[0] : null;
+    }
+    function colorsOf(el) {
+        if (!el) return null;
+        var cs = getComputedStyle(el);
+        if (isReal(cs.backgroundColor)) return { bg: cs.backgroundColor, fg: cs.color };
+        var g = gradColor(cs.backgroundImage);
+        if (g && isReal(g)) return { bg: g, fg: cs.color };
+        return null;
+    }
+    // Prefer a REAL primary button already on the page (it has the theme's real,
+    // fully-cascaded styling — e.g. the newsletter "Subscribe" button on Luma).
+    function fromSelector(sel) {
+        var els = document.querySelectorAll(sel);
+        for (var i = 0; i < els.length; i++) { var r = colorsOf(els[i]); if (r) return r; }
+        return null;
+    }
+    function fromSynthetic(cls) {
+        var el = document.createElement('button');
+        el.type = 'button'; el.className = cls;
+        el.style.cssText = 'position:absolute!important;left:-9999px;top:-9999px;width:48px;height:24px;opacity:0;pointer-events:none;';
+        document.body.appendChild(el);
+        var r = colorsOf(el);
+        document.body.removeChild(el);
+        return r;
+    }
+    function apply() {
+        var hit = fromSelector('button.action.primary, a.action.primary, .action.primary, button.btn-primary, a.btn-primary, .btn-primary, button.primary')
+               || fromSynthetic('action primary')
+               || fromSynthetic('btn btn-primary')
+               || fromSynthetic('btn-primary');
+        try { console.log('[StoreLocator] theme accent =', hit ? hit.bg : '(none — using default red/blue)', hit || ''); } catch (e) {}
+        if (!hit) return;  // no theme button colour found — keep the module defaults
+        var root = document.documentElement;
+        root.style.setProperty('--sf-accent', hit.bg);
+        if (/rgb/.test(hit.fg) || /^#/.test(hit.fg)) root.style.setProperty('--sf-accent-contrast', hit.fg);
+        root.setAttribute('data-sl-accent', hit.bg);  // visible in DOM for verification
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+    else apply();
+})();
+</script>
