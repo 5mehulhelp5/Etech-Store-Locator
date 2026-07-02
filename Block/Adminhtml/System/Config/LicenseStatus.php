@@ -41,13 +41,16 @@ class LicenseStatus extends Field
 
     private function buildBanner(): string
     {
-        $valid = false;
-        $host  = '';
-        $state = 'none';
+        $valid  = false;
+        $host   = '';
+        $state  = 'none';
+        $reason = '';
         try {
             $valid = $this->licenseValidator->isValid();
             $host  = $this->licenseValidator->getCurrentHost();
-            if (!$valid) {
+            if ($valid) {
+                $reason = $this->licenseValidator->getUnlockReason();
+            } else {
                 $state = $this->licenseValidator->getLicenseState();
             }
         } catch (\Throwable $e) {
@@ -55,7 +58,21 @@ class LicenseStatus extends Field
         }
 
         $id = 'etf-sl-status-detail';
-        if ($valid) {
+        if ($valid && $reason === 'dev-host') {
+            // Unlocked ONLY because this is a development / staging domain — be
+            // honest: there is no licence here, and one WILL be needed on production.
+            $dot    = '#0b5cad';
+            $bg     = '#e8f1fb';
+            $border = '#b8d4f0';
+            $fg     = '#0b3d73';
+            $title  = 'Store Locator is active (development domain)';
+            $sub    = $host !== ''
+                ? '— unlocked for ' . $this->escapeHtml($host) . ' · no licence required here'
+                : '— development domain · no licence required here';
+            $detail = 'This is a development / staging domain, so licence enforcement is bypassed and the full module '
+                . 'is unlocked <em>without a key</em>. <strong>A valid eTechFlow licence will be required when you go '
+                . 'live on your production domain</strong> — until then, any key in the field below is ignored.';
+        } elseif ($valid) {
             $dot    = '#1e7e34';
             $bg     = '#eaf7ee';
             $border = '#bfe3c8';

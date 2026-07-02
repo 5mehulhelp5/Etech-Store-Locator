@@ -94,6 +94,35 @@ class LicenseValidator
         return $this->checkKey($host);
     }
 
+    /**
+     * Explains WHY the module is currently unlocked. Only meaningful when
+     * isValid() is true — lets the admin banner tell the truth instead of
+     * calling a development-domain bypass "licensed".
+     *
+     *  - 'dev-host'  : development / staging domain (dev., staging., .test, …) —
+     *                  enforcement is bypassed and the module is unlocked with
+     *                  NO licence. A real licence is still required on production.
+     *  - 'licensed'  : a genuine licence validated for this domain (SP- portal
+     *                  subscription key, or an offline HMAC domain key).
+     *  - ''          : the module is NOT unlocked.
+     */
+    public function getUnlockReason(): string
+    {
+        $host = $this->getCurrentHost();
+        if ($host === '') {
+            return '';
+        }
+        // Sandbox toggle: if production enforcement is ever switched off, that is
+        // a bypass, not a real licence — surface it as a development unlock.
+        if (!$this->isProductionEnvironment()) {
+            return 'dev-host';
+        }
+        if ($this->isDevelopmentHost($host)) {
+            return 'dev-host';
+        }
+        return $this->checkKey($host) ? 'licensed' : '';
+    }
+
     public function computeKey(string $host): string
     {
         $payload = $this->canonicalize($host) . ':' . self::MODULE_ID;
