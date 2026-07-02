@@ -6,6 +6,10 @@ declare(strict_types=1);
 $apiKey    = $escaper->escapeHtmlAttr($block->getGoogleMapsApiKey());
 $searchUrl = $escaper->escapeUrl($block->getSearchUrl());
 $brand     = $block->getBrandName();
+// Admin-configured default search radius (miles). Fall back to 10 if unset, and
+// make sure the slider's max can always reach at least the configured default.
+$defaultRadius = max(1, $block->getDefaultRadius() ?: 10);
+$sliderMax     = max(100, $defaultRadius);
 
 $_om       = \Magento\Framework\App\ObjectManager::getInstance();
 $_storeMgr = $_om->get(\Magento\Store\Model\StoreManagerInterface::class);
@@ -391,7 +395,7 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
                 </div>
                 <div class="flex items-center gap-3 flex-none">
                     <label class="text-xs text-gray-500 whitespace-nowrap"><?= $escaper->escapeHtml(__('Search radius')) ?></label>
-                    <input type="range" x-model.number="radius" min="1" max="100" step="1"
+                    <input type="range" x-model.number="radius" min="1" max="<?= (int) $sliderMax ?>" step="1"
                            class="w-32 accent-brand-blue cursor-pointer">
                     <span class="text-xs font-bold text-brand-dark w-12" x-text="radius + ' mi'"></span>
                 </div>
@@ -665,7 +669,7 @@ function storeLocator() {
         mode:           'address',
         addressQuery:   '',
         storeQuery:     '',
-        radius:         10,
+        radius:         <?= (int) $defaultRadius ?>,
         sortBy:         'nearest',
         userLat:        null,
         userLng:        null,
@@ -827,7 +831,7 @@ function storeLocator() {
             this.userLat        = null;
             this.userLng        = null;
             this.error          = null;
-            this.radius         = 10;
+            this.radius         = <?= (int) $defaultRadius ?>;
             this.filteredStores = this.allStores.map(s => ({ ...s, distance: null }));
             this.currentPage    = 1;
             this.selectedStore  = null;

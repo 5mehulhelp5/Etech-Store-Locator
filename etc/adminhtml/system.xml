@@ -51,8 +51,8 @@
                     <comment>Optional. The map uses free Leaflet + OpenStreetMap and does not require a Google key.</comment>
                 </field>
                 <field id="default_radius" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Default Search Radius (km)</label>
-                    <comment>Default radius in kilometres used for the store finder search.</comment>
+                    <label>Default Search Radius (miles)</label>
+                    <comment>Default radius in miles the storefront finder starts with (the shopper can still drag the slider). Matches the storefront, which shows distances in miles.</comment>
                 </field>
             </group>
         </section>
