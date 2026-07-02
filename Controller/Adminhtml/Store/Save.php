@@ -73,6 +73,11 @@ class Save extends Action implements HttpPostActionInterface
         if (isset($data['is_active'])) {
             $data['is_active'] = (int) $data['is_active'];
         }
+        // Trim the optional external Store URL — a stray leading/trailing space
+        // would otherwise produce a broken "View Store" link.
+        if (isset($data['store_url'])) {
+            $data['store_url'] = trim((string) $data['store_url']);
+        }
 
         $store->setData($data);
 

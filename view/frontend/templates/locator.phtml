@@ -10,6 +10,9 @@ $brand     = $block->getBrandName();
 // make sure the slider's max can always reach at least the configured default.
 $defaultRadius = max(1, $block->getDefaultRadius() ?: 10);
 $sliderMax     = max(100, $defaultRadius);
+// Base URL for the built-in per-store page. "View Store" links here (…/id/<N>)
+// unless the store has an absolute external Store URL (https://…) set in admin.
+$storeViewBase = $block->getUrl('store-finder/store/view');
 
 $_om       = \Magento\Framework\App\ObjectManager::getInstance();
 $_storeMgr = $_om->get(\Magento\Store\Model\StoreManagerInterface::class);
@@ -525,7 +528,7 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     <?= $escaper->escapeHtml(__('Street View')) ?>
                                 </button>
-                                <a x-show="store.store_url" :href="store.store_url" @click.stop
+                                <a :href="storeViewUrl(store)" @click.stop
                                    class="sf-btn sf-btn--ghost inline-flex items-center justify-center gap-1.5 bg-white border border-gray-200 hover:border-brand-blue hover:text-brand-blue text-gray-600 text-xs font-bold px-4 py-2.5 rounded-lg transition uppercase tracking-wide w-full">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
                                     <?= $escaper->escapeHtml(__('View Store')) ?>
@@ -841,6 +844,14 @@ function storeLocator() {
         openStreetView(store) {
             if (!store.lat || !store.lng) return;
             window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + store.lat + ',' + store.lng, '_blank');
+        },
+
+        // "View Store" target: the store's own absolute URL if the merchant set one
+        // (https://…), otherwise the module's built-in per-store page (…/id/<N>).
+        storeViewUrl(store) {
+            const u = (store.store_url || '').trim();
+            if (/^https?:\/\//i.test(u)) return u;
+            return '<?= $escaper->escapeJs($storeViewBase) ?>' + 'id/' + store.id;
         },
 
         haversine(lat1, lng1, lat2, lng2) {
