@@ -35,6 +35,8 @@ class LicenseValidator
     public const XML_PATH_IP_BLOCKED             = 'etechflow_storelocator/license/ip_blocked';
     public const XML_PATH_PORTAL_URL             = 'etechflow_storelocator/license/portal_url';
     public const XML_PATH_PRODUCTION_ENVIRONMENT = 'etechflow_storelocator/license/production_environment';
+    /** When enabled, licensing is enforced even on development/staging domains (dev., staging., .test …). */
+    public const XML_PATH_ENFORCE_ON_DEV         = 'etechflow_storelocator/license/enforce_on_dev';
 
     /** Shared bundle config path — same value across all eTechFlow modules. */
     public const XML_PATH_BUNDLE_LICENSE_KEY = 'etechflow_bundle/license/license_key';
@@ -88,7 +90,10 @@ class LicenseValidator
         if (!$this->isProductionEnvironment()) {
             return true;
         }
-        if ($this->isDevelopmentHost($host)) {
+        // Development/staging domains normally run unlocked without a licence — UNLESS
+        // the merchant opts in to enforcement here (e.g. to validate a production
+        // licence before go-live). When enforced, fall through to the real key check.
+        if (!$this->isEnforcedOnDev() && $this->isDevelopmentHost($host)) {
             return true;
         }
         return $this->checkKey($host);
@@ -117,7 +122,7 @@ class LicenseValidator
         if (!$this->isProductionEnvironment()) {
             return 'dev-host';
         }
-        if ($this->isDevelopmentHost($host)) {
+        if (!$this->isEnforcedOnDev() && $this->isDevelopmentHost($host)) {
             return 'dev-host';
         }
         return $this->checkKey($host) ? 'licensed' : '';
@@ -164,6 +169,16 @@ class LicenseValidator
     {
         // Sandbox toggle removed: production licensing is always enforced.
         return true;
+    }
+
+    /**
+     * Opt-in: enforce licensing even on development/staging domains. Off by default
+     * so agencies can develop on dev./staging hosts without a licence; turn it on to
+     * validate a real production licence on a dev subdomain before go-live.
+     */
+    public function isEnforcedOnDev(): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_ENFORCE_ON_DEV, ScopeInterface::SCOPE_STORE);
     }
 
     public function getPortalUrl(): string

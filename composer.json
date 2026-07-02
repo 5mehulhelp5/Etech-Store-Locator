@@ -2,7 +2,7 @@
     "name": "etechflow/module-store-locator",
     "description": "EtechFlow Store Locator — admin-managed store/branch finder for Magento 2 with a Leaflet + OpenStreetMap map and postcode proximity search (postcodes.io). Hyva and Luma compatible. No paid map API key required.",
     "type": "magento2-module",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "license": "proprietary",
     "homepage": "https://etechflow.com/products/store-locator",
     "support": {
