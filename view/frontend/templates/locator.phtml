@@ -866,7 +866,17 @@ function storeLocator() {
 <link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin>
 <link rel="preconnect" href="https://c.tile.openstreetmap.org" crossorigin>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" async></script>
+<script>
+    /* Leaflet ships a UMD wrapper. When Magento's RequireJS is present (Luma), it
+       calls define() as an anonymous module → RequireJS throws "Mismatched anonymous
+       define" and L never becomes global, so the map can't init. Hide define.amd for
+       the duration of the (synchronous, non-async) Leaflet load so it falls back to
+       window.L, then restore it. Hyvä has no RequireJS → this is a harmless no-op. */
+    window.__slLeafletAmd = (window.define && window.define.amd) || undefined;
+    if (window.define) { window.define.amd = false; }
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>if (window.define) { window.define.amd = window.__slLeafletAmd; }</script>
 
 <script>
 /* Auto-match the active theme: read the theme's primary-button colour and feed it
