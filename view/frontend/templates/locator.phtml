@@ -288,28 +288,22 @@ body.storelocator-index-index .column.main{padding-bottom:0 !important;margin-bo
        reset never touches the surrounding Luma header/footer. */ ?>
 <script>
 (function () {
-    // Probe: does the active theme already provide Tailwind? (Hyvä does — '.flex' resolves.)
+    // The Tailwind utilities this page uses ship as a PRECOMPILED, .ks-locator-scoped
+    // stylesheet (Etechflow_StoreLocator::css/locator-tailwind.css, added via layout)
+    // so the layout renders on any theme WITHOUT the Tailwind Play CDN (dev-only) and
+    // without depending on the host theme's purged Tailwind build.
+    //
+    // Alpine, however, is provided by Hyvä but NOT by Luma. Probe for the host theme's
+    // own (unscoped) Tailwind — a bare `.flex` resolves on Hyvä but not Luma — as a
+    // reliable "this theme already ships Alpine" signal, and only load Alpine on Luma.
     var probe = document.createElement('div');
     probe.className = 'flex';
     document.body.appendChild(probe);
-    var hasTailwind = window.getComputedStyle(probe).display === 'flex';
+    var themeHasTailwind = window.getComputedStyle(probe).display === 'flex';
     document.body.removeChild(probe);
-    if (hasTailwind) { return; }   // Hyvä — nothing to do.
+    if (themeHasTailwind) { return; }   // Hyvä — provides Alpine already, nothing to load.
 
-    // Luma fallback — register the brand colours the markup uses, disable preflight,
-    // then pull in Tailwind (JIT) and Alpine for this page.
-    window.tailwind = {
-        config: {
-            corePlugins: { preflight: false },
-            theme: { extend: { colors: { brand: {
-                dark: '#0E1025', blue: '#0535F5', red: '#C41818'
-            } } } }
-        }
-    };
-    var tw = document.createElement('script');
-    tw.src = 'https://cdn.tailwindcss.com';
-    document.head.appendChild(tw);
-
+    // Luma — load Alpine for this page (the utilities already come from our CSS).
     if (typeof window.Alpine === 'undefined') {
         var al = document.createElement('script');
         al.src = 'https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js';
